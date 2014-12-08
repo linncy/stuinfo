@@ -1,0 +1,324 @@
+# -*- coding: utf-8-*-
+#coding=utf-8
+import urllib  
+import urllib2
+import cookielib
+import copy
+from Tkinter import *
+from tkMessageBox import*
+
+pathset='/Users/lin/Desktop/'
+output=[]
+def netget(sid,spw):
+    output[:]=[]
+    cookie = cookielib.CookieJar()  
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
+
+    #需要POST的数据#
+    postdata=urllib.urlencode({
+         '__VIEWSTATE':'dDw1MzM5MjMxNzE7dDw7bDxpPDE+Oz47bDx0PDtsPGk8Nj47PjtsPHQ8cDxwPGw8VGV4dDs+O2w85a2m55Sf5Yid5aeL5a+G56CB5Li66Lqr5Lu96K+B5Y+35ZCO5YWt5L2N44CC5a+G56CB6ZW/5bqm5LiN6LaF6L+HMTDkuKrlrZfnrKbjgII7Pj47Pjs7Pjs+Pjs+Pjs+X6hpnOCSob4guupt0tQ3I/HXwrk=',
+        'TxtStudentid':sid,
+        'TxtPassword':spw,
+         'BtnLogin':'none'
+
+    })
+
+    #自定义一个请求#
+    req = urllib2.Request(  
+        url = 'http://202.120.108.16/ecustedu/StudentLogin.aspx',  
+        data = postdata
+    )
+
+
+    #访问该链接#
+    result = opener.open(req)
+
+    #打印返回的内容#
+    # print result.read()   
+
+    #打印cookie的值
+    #for item in cookie:  
+        #print 'Cookie：Name = '+item.name  
+        #print 'Cookie：Value = '+item.value
+
+    
+    #访问该链接#
+    result = opener.open('http://202.120.108.16/ecustedu/G_StuADmin/G_StuInfoModify.aspx')
+    data=result.read()
+    #打印返回的内容#
+    #print len(data)
+    #---------getvalue----------------
+    i=0
+    while (i<=len(data)-1):
+        if(data[i]=='v' and data[i+1]=='a' and data[i+2]=='l'and data[i+3]=='u'and data[i+4]=='e'):
+           j=0
+           while(data[i+7+j]!='"'):
+                 j=j+1
+           output.append(data[i+7:i+7+j])
+        i=i+1
+    if output[1]=='\xe7\x99\xbb\xe5\xbd\x95':
+        return 404
+    else:
+        #--------------------------------
+        #-------print value------------
+        #redata=filter_tags(data)
+        #print redata
+        CODEC = 'utf-8'
+        i=1
+        lenofoutput=len(output)-1
+        while(i<=lenofoutput):
+            print output[i].decode(CODEC)
+            i=i+1
+        #print output
+        shower=copy.deepcopy(output)
+        result = opener.open('http://202.120.108.14/ecustedu/StudentLogin.aspx?logoff=1')
+        return 4
+#----------------------------------------------------------------------
+def infoshow():
+    stuid=sid.get()
+    stupas=spw.get()
+    returnvalue=netget(stuid,stupas)
+    if returnvalue==404:
+        showinfo('获取失败','用户名或密码错误')
+    else:
+        info_namet.set(output[30])
+        info_namee.grid(row=1,column=1)
+
+        info_sext.set(output[25])
+        info_sexe.grid(row=1,column=3)
+
+        info_colleget.set(output[3])
+        info_collegee.grid(row=2,column=1)
+
+        info_majort.set(output[5])
+        info_majore.grid(row=2,column=3)
+
+        info_classt.set(output[18])
+        info_classe.grid(row=3,column=1)
+
+        info_dormitoryt.set(output[17])
+        info_dormitorye.grid(row=3,column=3)
+
+        info_idnot.set(output[23])
+        info_idnoe.grid(row=4,column=1)
+
+        info_telt.set(output[20])
+        info_tele.grid(row=4,column=3)
+
+        info_birthdayt.set(output[24])
+        info_birthdaye.grid(row=5,column=1)
+        
+        info_nativet.set(output[31])
+        info_nativee.grid(row=5,column=3)
+
+        info_politicalstatust.set(output[27])
+        info_politicalstatuse.grid(row=6,column=1)
+
+        info_ethnict.set(output[28])
+        info_ethnice.grid(row=6,column=3)
+
+        info_addresst.set(output[21])
+        info_addresse.grid(row=8,column=1)
+
+        info_gradet.set(output[7])
+        info_gradee.grid(row=8,column=3)
+
+def moreinfo():
+    root_moreinfo=Tk()
+    root_moreinfo.title('更多信息')
+    root_moreinfo.geometry("300x800") 
+    i=5
+    while i<=32:
+        Label(root_moreinfo,text=output[i]).pack()
+        i=i+1
+    root_moreinfo.mainloop()
+
+def saver():
+    stuid=sid.get()
+    print pathset
+    fname=pathset+stuid+'.txt'
+    fobj=open(fname, 'w')
+    i=1
+    while i<=32:
+        fobj.writelines(output[i])
+        fobj.writelines("\n")
+        i=i+1
+    fobj.close()
+    showinfo('提示信息','提交保存成功')
+
+def seter():
+    root_set=Tk()
+    path=StringVar()
+    root_set.title('文件保存路径设置')
+    root_set.geometry("300x300") 
+    Label(root_set,text='请输入保存文件路径，如“/Users/lin/Desktop/”').pack()
+    setinfo=Entry(root_set,textvariable=path)
+    b=Button(root_set,text='更新',command=getter)
+    setinfo.pack()
+    b.pack()
+    root_set.mainloop()
+
+def abouter():
+    root_about=Tk()
+    root_about.title('关于')
+    root_about.geometry("300x400") 
+    info_about=Label(root_about,text='林长远   10141344')
+    info_about.grid(row=0,column=1)
+    info_sys=Label(root_about,text='A Lincy‘s Produdct\nGithub')
+    info_sys.grid(row=2,column=1)
+    root_about.mainloop()
+
+def getter():
+    print path.get()
+    a=path.get()
+    pathset=a
+    pathset=raw_input('Enter Path')
+
+def cmdset():
+    pathset=raw_input('Enter Path')
+    print pathset
+
+root=Tk()
+root.title('华东理工大学学生信息查询系统 Python-林长远10141344')
+root.geometry("640x480") 
+menubar=Menu(root)
+filemenu=Menu(menubar,tearoff=0)
+filemenu.add_command(label='更多信息',command=moreinfo)
+filemenu.add_command(label='保存',command=saver)
+filemenu.add_command(label='退出',command=exit)
+menubar.add_cascade(label='文件',menu=filemenu)
+
+setmenu=Menu(menubar,tearoff=0)
+setmenu.add_command(label='环境变量设置',command=seter)
+setmenu.add_command(label='Command Line Mode',command=cmdset)
+menubar.add_cascade(label='设置',menu=setmenu)
+
+aboutmenu=Menu(menubar,tearoff=0)
+aboutmenu.add_command(label='开发者信息',command=abouter)
+menubar.add_cascade(label='关于',menu=aboutmenu)
+
+root.config(menu=menubar)
+
+sid=StringVar()
+spw=StringVar()
+info1t=StringVar()
+info2t=StringVar()
+info3t=StringVar()
+info4t=StringVar()
+info_namet=StringVar()
+info_sext=StringVar()
+info_colleget=StringVar()
+info_majort=StringVar()
+info_classt=StringVar()
+info_dormitoryt=StringVar()
+info_idnot=StringVar()
+info_telt=StringVar()
+info_birthdayt=StringVar()
+info_nativet=StringVar()
+info_politicalstatust=StringVar()
+info_ethnict=StringVar()
+info_addresst=StringVar()
+info_gradet=StringVar()
+path=StringVar()
+
+l1=Label(root,text='学号:')
+l1.grid(row=0,column=0)
+e1=Entry(root,textvariable=sid)
+e1.grid(row=0,column=1)
+l2=Label(root,text='密码:')
+l2.grid(row=0,column=2)
+e2=Entry(root,textvariable=spw)
+e2.grid(row=0,column=3)
+e2["show"]="*"
+b1=Button(root,text='登陆',command=infoshow)
+b1.grid(row=0,column=4)
+
+
+info_name=Label(root,text='姓名')
+info_name.grid(row=1,column=0)
+info_namee=Entry(root,textvariable=info_namet)
+info_namee.grid(row=1,column=1)
+
+info_sex=Label(root,text='性别')
+info_sex.grid(row=1,column=2)
+info_sexe=Entry(root,textvariable=info_sext)
+info_sexe.grid(row=1,column=3)
+
+info_college=Label(root,text='学院')
+info_college.grid(row=2,column=0)
+info_collegee=Entry(root,textvariable=info_colleget)
+info_collegee.grid(row=2,column=1)
+
+
+info_major=Label(root,text='专业')
+info_major.grid(row=2,column=2)
+info_majore=Entry(root,textvariable=info_majort)
+info_majore.grid(row=2,column=3)
+
+info_class=Label(root,text='班级')
+info_class.grid(row=3,column=0)
+info_classe=Entry(root,textvariable=info_classt)
+info_classe.grid(row=3,column=1)
+
+info_dormitory=Label(root,text='寝室')
+info_dormitory.grid(row=3,column=2)
+info_dormitorye=Entry(root,textvariable=info_dormitoryt)
+info_dormitorye.grid(row=3,column=3)
+
+info_idno=Label(root,text='身份证号码')
+info_idno.grid(row=4,column=0)
+info_idnoe=Entry(root,textvariable=info_idnot)
+info_idnoe.grid(row=4,column=1)
+
+info_tel=Label(root,text='联系电话')
+info_tel.grid(row=4,column=2)
+info_tele=Entry(root,textvariable=info_telt)
+info_tele.grid(row=4,column=3)
+
+info_birthday=Label(root,text='出生日期')
+info_birthday.grid(row=5,column=0)
+info_birthdaye=Entry(root,textvariable=info_birthdayt)
+info_birthdaye.grid(row=5,column=1)
+
+info_native=Label(root,text='籍贯')
+info_native.grid(row=5,column=2)
+info_nativee=Entry(root,textvariable=info_nativet)
+info_nativee.grid(row=5,column=3)
+
+info_politicalstatus=Label(root,text='政治面貌')
+info_politicalstatus.grid(row=6,column=0)
+info_politicalstatuse=Entry(root,textvariable=info_politicalstatust)
+info_politicalstatuse.grid(row=6,column=1)
+
+info_ethnic=Label(root,text='民族')
+info_ethnic.grid(row=6,column=2)
+info_ethnice=Entry(root,textvariable=info_ethnict)
+info_ethnice.grid(row=6,column=3)
+
+info_address=Label(root,text='家庭住址')
+info_address.grid(row=8,column=0)
+info_addresse=Entry(root,textvariable=info_addresst)
+info_addresse.grid(row=8,column=1)
+
+info_grade=Label(root,text='年级')
+info_grade.grid(row=8,column=2)
+info_gradee=Entry(root,textvariable=info_gradet)
+info_gradee.grid(row=8,column=3)
+
+b2=Button(root,text='更多信息',command=moreinfo)
+b2.grid(row=9,column=1)
+
+b3=Button(root,text='保存',command=saver)
+b3.grid(row=9,column=3)
+
+b4=Button(root,text='退出',command=exit)
+b4.grid(row=9,column=4)
+
+c=Canvas(root,width=480,height=180,bg='white')
+pic=PhotoImage(file="ecust.gif")
+r1=c.create_image(240,90,image=pic)
+c.grid(row=10,column=0,rowspan=10,columnspan=5)
+
+info_15=Label(root,text='Developed By Lincy')
+info_15.grid(row=16,column=2)
+root.mainloop()
